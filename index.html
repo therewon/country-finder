@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country Finder</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <div id="container">
+        <header>
+            <div id="search">
+                <img src="./magnifying-glass-svgrepo-com.svg" alt="magnifying-glass" style="width: 15px; height: 15px;">
+                <input type="text" placeholder="Search for a country" id="search-input">
+            </div>
+            <div>
+                <select name="filter" id="filter">
+                    <option value="All">All</option>
+                    <option value="Euro">Euro</option>
+                    <option value="Asia">Asia</option>
+                    <option value="Africa">Africa</option>
+                    <option value="America">America</option>
+                </select>
+            </div>
+        </header>
+        <div id="cards"></div>
+    </div>
+
+    <script>
+        let cards = document.getElementById('cards')
+        let input = document.getElementById('search-input')
+        let filter = document.getElementById('filter')
+        let allCountries = []
+        
+        fetch("https://restcountries.com/v3.1/all")
+        .then(response => response.json())
+        .then((e)=>{
+            allCountries = e
+            displayCountries(allCountries)
+        })
+        .catch((err)=> {console.error(err)})
+        
+        function displayCountries(countries) {
+        cards.innerHTML = "";
+        countries.forEach(elem => {
+            cards.innerHTML += `
+                <div id="card">
+                    <img src="${elem.flags.png}" />
+                    <div class="info-container">
+                        <h1>${elem.name.common}</h1>
+                        <p><span>Population:</span> ${elem.population.toLocaleString()}</p>
+                        <p><span>Region:</span> ${elem.region}</p>
+                        <p><span>Capital: </span> ${elem.capital[0]}</p>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+        function filterCountries() {
+            const searchValue = input.value.toLowerCase();
+            const filterValue = filter.value.toLowerCase();
+
+            const filteredCountries = allCountries.filter(country => {
+                const matchesSearch = country.name.common.toLowerCase().includes(searchValue);
+                const matchesFilter = filterValue === "all" || country.region.toLowerCase().includes(filterValue);
+                return matchesSearch && matchesFilter;
+            });
+
+            displayCountries(filteredCountries);
+        }
+
+        input.addEventListener('input', filterCountries)
+        filter.addEventListener('change', filterCountries)
+    </script>
+</body>
+</html>
